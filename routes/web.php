@@ -13,12 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/shp', 'ShpController@index');
 
-Route::get('/', function () {
-    return view('contents.home');
-});
-// Route::redirect('/', '/login');
+// Route::get('/', function () {
+//     return view('contents.home');
+// });
+Route::redirect('/', '/login');
 
-// Auth::routes();
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Auth::routes();
+Auth::routes(['verify' => true]);
+// Route::get('/email', 'Auth\VerificationController@show');
+
+// Route::post('/resend', 'Auth\VerificationController@resend')->name('verification.resend');
+
+// Route::post('/verify', 'Auth\VerificationController@verify')->name('verification.verify');
+
+Route::get('/home','HomeController@index')->name('home');
