@@ -23,10 +23,5 @@ Route::redirect('/', '/login');
 
 Auth::routes();
 Auth::routes(['verify' => true]);
-// Route::get('/email', 'Auth\VerificationController@show');
-
-// Route::post('/resend', 'Auth\VerificationController@resend')->name('verification.resend');
-
-// Route::post('/verify', 'Auth\VerificationController@verify')->name('verification.verify');
 
 Route::get('/home','HomeController@index')->name('home');
