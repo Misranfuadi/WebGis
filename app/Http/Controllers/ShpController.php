@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
-use Shapefile\Shapefile;
+// use Shapefile\Shapefile;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileReader;
 
@@ -17,33 +18,38 @@ class ShpController extends Controller
     public function index()
     {
         try {
-        // Open Shapefile
-        $Shapefile = new ShapefileReader(public_path('file/kawasan_aceh/Kawasan_Strategis_Aceh'));
+            // Open Shapefile
+            $Shapefile = new ShapefileReader(public_path('file/kawasan_aceh/Kawasan_Strategis_Aceh'));
 
-        // Read all the records
-        while ($Geometry = $Shapefile->fetchRecord()) {
-            // Skip the record if marked as "deleted"
-            if ($Geometry->isDeleted()) {
-                continue;
+
+            // Read all the records
+            while ($Geometry = $Shapefile->fetchRecord()) {
+                // Skip the record if marked as "deleted"
+                if ($Geometry->isDeleted()) {
+                    continue;
+                }
+
+                // Print Geometry as an Array
+                //dump($Geometry->getArray());
+
+                // Print Geometry as WKT
+                //dump($Geometry->getWKT());
+
+
+
+                // Print DBF data
+                $dbf[] = ($Geometry->getDataArray());
+
+
+                // Print Geometry as GeoJSON
+                $shp[] = ($Geometry->getGeoJSON());
             }
 
-            // Print Geometry as an Array
-            //dump($Geometry->getArray());
+            foreach ($dbf as $key => $value) {
+                $dbf[$key]['KOORDINAT'] = $shp[$key];
+            }
 
-            // Print Geometry as WKT
-            // dump($Geometry->getWKT());
-
-
-             //dump($Geometry->getWKT());
-
-
-            // Print DBF data
-            dump($Geometry->getDataArray());
-
-            // Print Geometry as GeoJSON
-            dump($Geometry->getGeoJSON());
-        }
-
+            return view('contents.shp', compact('dbf'));
         } catch (ShapefileException $e) {
             // Print detailed error information
             echo "Error Type: " . $e->getErrorType()
