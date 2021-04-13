@@ -4,10 +4,10 @@
 <div class="login-box">
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <a href="#" class="h1"><b>Web</b>Gis</a>
+            <a href="#" class="h1"><b>Gudang</b>SHP</a>
         </div>
         <div class="card-body">
-            <p class="login-box-msg">You are only one step a way from your new password, recover your password now.</p>
+            <p class="login-box-msg">{{ trans('panel.AuthPage.reset_title') }}</p>
             <form method="POST" action="{{ route('password.update') }}">
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">

@@ -5,11 +5,11 @@
 
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <a href="#" class="h1"><b>Web</b>Gis</a>
+            <a href="#" class="h1"><b>Gudang</b>SHP</a>
         </div>
         <!-- /.login-logo -->
         <div class="card-body login-card-body">
-            <p class="login-box-msg">You forgot your password? Here you can easily retrieve a new password.</p>
+            <p class="login-box-msg">{{ trans('panel.AuthPage.email_title') }}</p>
             @if (session('status'))
             <div class="alert alert-success" role="alert">
                 {{ session('status') }}

@@ -14,14 +14,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/shp', 'ShpController@index');
 
-// Route::get('/', function () {
-//     return view('contents.home');
-// });
 Route::redirect('/', '/login');
 
 Auth::routes();
 Auth::routes(['verify' => true]);
 
-Route::get('/home','HomeController@index')->name('home');
+Route::get('home', 'HomeController@index')->name('home');
+
+Route::get('user', 'UserController@index')->name('user');
+Route::post('user/store', 'UserController@store')->name('user.store');

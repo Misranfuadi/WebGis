@@ -1,10 +1,7 @@
 <?php
 
 return [
-    'userManagement' => [
-        'title'          => 'User management',
-        'title_singular' => 'User management',
-    ],
+
     'permission'     => [
         'title'          => 'Permissions',
         'title_singular' => 'Permission',
@@ -40,31 +37,40 @@ return [
         ],
     ],
     'user'           => [
-        'title'          => 'Users',
-        'title_singular' => 'User',
+        'title'          => 'Users Management',
+        'title_add_modal' => 'Adding User',
+        'title_edit_modal' => 'Editing User',
         'fields'         => [
             'id'                       => 'ID',
-            'id_helper'                => '',
-            'name'                     => 'Name',
-            'name_helper'              => '',
+            'nip'                      => 'NIP',
+            'name'                     => 'Full Name',
             'email'                    => 'Email',
-            'email_helper'             => '',
+            'verify'                   => 'Verify Email',
             'email_verified_at'        => 'Email verified at',
-            'email_verified_at_helper' => '',
             'password'                 => 'Password',
-            'password_helper'          => '',
+            'password_confirm'           => 'Retype Password',
             'roles'                    => 'Roles',
-            'roles_helper'             => '',
-            'remember_token'           => 'Remember Token',
-            'remember_token_helper'    => '',
-            'created_at'               => 'Created at',
-            'created_at_helper'        => '',
-            'updated_at'               => 'Updated at',
-            'updated_at_helper'        => '',
-            'deleted_at'               => 'Deleted at',
-            'deleted_at_helper'        => '',
+            'status'                   => 'Status',
+            'created_at'               => 'Created',
+            'updated_at'               => 'Updated',
+            'add'                      => 'Add Data',
+            'close'                      => 'Close',
+            'action'                      => 'Action',
+
         ],
     ],
+
+    'register'           => [
+        'title'          => 'Register a new membership',
+        'fields'         => [
+            'name'                     => 'Full Name',
+            'nip'                     => 'NIP',
+            'email'                    => 'Email',
+            'password'                 => 'Password',
+            'password_confirm'           => 'Retype Password',
+        ],
+    ],
+
     'student'        => [
         'title'          => 'Students',
         'title_singular' => 'Student',
@@ -105,32 +111,6 @@ return [
             'updated_at_helper' => '',
             'deleted_at'        => 'Deleted at',
             'deleted_at_helper' => '',
-        ],
-    ],
-    'invoice'        => [
-        'title'          => 'Invoices',
-        'title_singular' => 'Invoice',
-        'fields'         => [
-            'id'                    => 'ID',
-            'id_helper'             => '',
-            'student'               => 'Student',
-            'student_helper'        => '',
-            'period_from'           => 'Period From',
-            'period_from_helper'    => '',
-            'period_to'             => 'Period To',
-            'period_to_helper'      => '',
-            'invoice_number'        => 'Invoice Number',
-            'invoice_number_helper' => '',
-            'total_amount'          => 'Total Amount',
-            'total_amount_helper'   => '',
-            'paid_at'               => 'Paid At',
-            'paid_at_helper'        => '',
-            'created_at'            => 'Created at',
-            'created_at_helper'     => '',
-            'updated_at'            => 'Updated at',
-            'updated_at_helper'     => '',
-            'deleted_at'            => 'Deleted at',
-            'deleted_at_helper'     => '',
         ],
     ],
 ];

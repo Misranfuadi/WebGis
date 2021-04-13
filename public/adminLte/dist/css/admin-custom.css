@@ -1,0 +1,59 @@
+/* ----loading---- */
+.bg-loading {
+    padding-top: 25%;
+    padding-right: 50%;
+    padding-bottom: 50%;
+    padding-left: 50%;
+    background-color: black;
+    opacity: 0.8;
+    position: fixed;
+    border-radius: 4px;
+    left: 0%;
+    top: 0%;
+    margin: -40px 0 0 -50px;
+    z-index: 2000;
+    display: none;
+}
+
+.loading {
+    width: 100px;
+    height: 100px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border-top: 10px solid #e74c3c;
+    top: 50%;
+    animation: a1 2s linear infinite;
+}
+
+.loading::before,
+.loading::after {
+    content: '';
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    left: 0;
+    top: -10px;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.loading::before {
+    border-top: 10px solid #e67e22;
+    transform: rotate(120deg);
+}
+
+.loading::after {
+    border-top: 10px solid #3498db;
+    transform: rotate(240deg);
+}
+
+@keyframes a1 {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+iframe {
+    max-width: 250px;
+    max-height: 200px;
+}

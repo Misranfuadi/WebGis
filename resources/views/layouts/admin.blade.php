@@ -17,6 +17,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link rel="stylesheet" href="{{ asset('adminlte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="{{ asset('adminlte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css')}}">
+    <!-- Loading -->
+    <link rel="stylesheet" href="{{ asset('adminlte/dist/css/admin-custom.css') }}">
 
     @yield('styles')
 </head>
@@ -41,7 +45,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
         <!-- Main Footer -->
         @include('partials.footer')
+
+        {{-- loading --}}
+        <div class="bg-loading">
+            <div class="loading">
+            </div>
+        </div>
     </div>
+
     <!-- ./wrapper -->
 
     <!-- REQUIRED SCRIPTS -->
@@ -52,6 +63,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
+    <!-- SweetAlert2 -->
+    <script src="{{ asset('adminlte/plugins/sweetalert2/sweetalert2.min.js')}}"></script>
+
     @yield('scripts')
 </body>
 
