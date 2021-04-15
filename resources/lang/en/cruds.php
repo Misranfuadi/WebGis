@@ -18,24 +18,7 @@ return [
             'deleted_at_helper' => '',
         ],
     ],
-    'role'           => [
-        'title'          => 'Roles',
-        'title_singular' => 'Role',
-        'fields'         => [
-            'id'                 => 'ID',
-            'id_helper'          => '',
-            'title'              => 'Title',
-            'title_helper'       => '',
-            'permissions'        => 'Permissions',
-            'permissions_helper' => '',
-            'created_at'         => 'Created at',
-            'created_at_helper'  => '',
-            'updated_at'         => 'Updated at',
-            'updated_at_helper'  => '',
-            'deleted_at'         => 'Deleted at',
-            'deleted_at_helper'  => '',
-        ],
-    ],
+
     'user'           => [
         'title'          => 'Users Management',
         'title_add_modal' => 'Adding User',
@@ -72,33 +55,11 @@ return [
         ],
     ],
 
-    'student'        => [
-        'title'          => 'Students',
-        'title_singular' => 'Student',
-        'fields'         => [
-            'id'                     => 'ID',
-            'id_helper'              => '',
-            'first_name'             => 'First Name',
-            'first_name_helper'      => '',
-            'last_name'              => 'Last Name',
-            'last_name_helper'       => '',
-            'email'                  => 'Email',
-            'email_helper'           => '',
-            'billing_address'        => 'Billing Address',
-            'billing_address_helper' => '',
-            'action'                 => 'Action',
-            'action_helper'          => '',
-            'created_at'             => 'Created at',
-            'created_at_helper'      => '',
-            'updated_at'             => 'Updated at',
-            'updated_at_helper'      => '',
-            'deleted_at'             => 'Deleted at',
-            'deleted_at_helper'      => '',
-        ],
-    ],
-    'attendance'     => [
-        'title'          => 'Attendance',
-        'title_singular' => 'Attendance',
+
+    'shp'     => [
+        'title'          => 'Base Management SHP',
+        'title_add_modal' => 'Adding SHP',
+        'title_edit_modal' => 'Editing SHP',
         'fields'         => [
             'id'                => 'ID',
             'id_helper'         => '',

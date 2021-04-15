@@ -31,7 +31,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     @yield('styles')
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini  layout-fixed">
     <div class="wrapper">
 
         <!-- Navbar -->
@@ -52,10 +52,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Main Footer -->
         @include('partials.footer')
 
-        {{-- loading --}}
-        <div class="bg-loading">
-            <div class="loading">
-            </div>
+
+    </div>
+
+    {{-- loading --}}
+    <div class="bg-loading">
+        <div class="loading">
         </div>
     </div>
 

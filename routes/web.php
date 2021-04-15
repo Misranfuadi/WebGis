@@ -22,6 +22,10 @@ Auth::routes(['verify' => true]);
 
 Route::get('home', 'HomeController@index')->name('home');
 
+Route::get('shp', 'ShpController@index')->name('shp');
+
+Route::get('support', 'SupportController@index')->name('support');
+
 Route::get('user', 'UserController@index')->name('user');
 Route::post('user/store', 'UserController@store')->name('user.store');
 Route::get('user/edit/{id}', 'UserController@edit');

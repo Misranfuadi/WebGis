@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePetasTable extends Migration
+class CreateDatashpsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class CreatePetasTable extends Migration
      */
     public function up()
     {
-        Schema::create('petas', function (Blueprint $table) {
-            $table->id();
+        Schema::create('datashps', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('id_shp')->unsigned();
+            $table->text('note');
+            $table->string('data_shp');
+            $table->integer('created_by')->unsigned();
             $table->timestamps();
         });
     }
@@ -26,6 +30,6 @@ class CreatePetasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('petas');
+        Schema::dropIfExists('datashps');
     }
 }
