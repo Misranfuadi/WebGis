@@ -75,4 +75,30 @@ return [
             'deleted_at_helper' => '',
         ],
     ],
+
+
+    'alias'     => [
+        'title'          => 'Data Nama Field',
+        'title_add_modal' => 'Adding Nama Field',
+        'title_edit_modal' => 'Editing Nama Field',
+        'fields'         => [
+            'nama_field'        => 'Nama Field',
+            'alias'             => 'Alias',
+            'created_at'        => 'Created at',
+            'updated_at'        => 'Updated at',
+            'deleted_at'        => 'Deleted at',
+        ],
+    ],
+
+    'rencana'     => [
+        'title'          => 'Data Nama Rencana',
+        'title_add_modal' => 'Adding Nama Rencana',
+        'title_edit_modal' => 'Editing Nama Rencana',
+        'fields'         => [
+            'nama'        => 'Nama',
+            'created_at'        => 'Created at',
+            'updated_at'        => 'Updated at',
+            'deleted_at'        => 'Deleted at',
+        ],
+    ],
 ];

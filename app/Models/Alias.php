@@ -12,6 +12,8 @@ class Alias extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $table = 'aliases';
+
     protected $fillable = [
         'alias',
         'nama_field',

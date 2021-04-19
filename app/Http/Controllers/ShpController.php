@@ -17,7 +17,49 @@ class ShpController extends Controller
      */
     public function index()
     {
-        return view('contents.shp');
+        try {
+            // Open Shapefile
+            $Shapefile = new ShapefileReader(public_path('file/jalan/JARINGAN_JALAN_ACEH'));
+
+
+            // Read all the records
+            while ($Geometry = $Shapefile->fetchRecord()) {
+                // Skip the record if marked as "deleted"
+                if ($Geometry->isDeleted()) {
+                    continue;
+                }
+
+                // Print Geometry as an Array
+                //dump($Geometry->getArray());
+
+                // Print Geometry as WKT
+                //dump($Geometry->getWKT());
+
+
+
+                // Print DBF data
+                $dbf[] = ($Geometry->getDataArray());
+
+
+                // Print Geometry as GeoJSON
+                $shp[] = ($Geometry->getGeoJSON());
+            }
+
+            foreach ($dbf as $key => $value) {
+                $dbf[$key]['KOORDINAT'] = $shp[$key];
+            }
+
+            dd($dbf);
+
+            //return view('contents.shp', compact('dbf'));
+        } catch (ShapefileException $e) {
+            // Print detailed error information
+            echo "Error Type: " . $e->getErrorType()
+                . "\nMessage: " . $e->getMessage()
+                . "\nDetails: " . $e->getDetails();
+        }
+
+        // return view('contents.shp');
     }
 
     /**

@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Validator;
+use App\Models\Alias;
+use App\Models\Rencana;
 
 
 class SupportController extends Controller
@@ -23,56 +27,32 @@ class SupportController extends Controller
         return view('contents.supportData');
     }
 
-    public function rencana()
+    public function alias()
     {
         if (request()->ajax()) {
-            return datatables()->of(User::orderBy('created_at', 'desc')->get())
+            return datatables()->of(Alias::orderBy('created_at', 'desc')->get())
                 ->addIndexColumn()
-                ->addColumn('verify', function ($data) {
-
-                    if ($data->email_verified_at == null) {
-                        return '<span class="right badge badge-danger">unverified</span>';
-                    } else {
-                        return ' <span class="right badge badge-success">Verified</span>';
-                    }
-                })
-
-                ->addColumn('status', function ($data) {
-
-                    if ($data->status == 0) {
-                        return '<span class="right badge badge-warning">Unapproval </span>';
-                    } elseif ($data->status == 1) {
-                        return ' <span class="right badge badge-success">Approval</span>';
-                    } else {
-                        return ' <span class="right badge badge-danger">Blocked</span>';
-                    }
-                })
                 ->addColumn('aksi', function ($data) {
                     $dataId = Crypt::encryptString($data->id);
-                    if (Auth::user()->id == $data->id) {
-                        return  '<button type="button" name="edit" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
-                            '<button type="button" disabled  class="delete btn btn-danger btn-xs">Hapus</button>';
-                    } else {
-                        return  '<button type="button" name="edit" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
-                            '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
-                    }
-                })->rawColumns(['aksi', 'status', 'verify'])->make(true);
+
+                    return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit_alias btn btn-warning btn-xs  mr-2">Edit</button>' .
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                })->rawColumns(['aksi'])->make(true);
         }
     }
 
-    public function alias()
+    public function rencana()
     {
-        return view('contents.supportData');
-    }
+        if (request()->ajax()) {
+            return datatables()->of(Rencana::orderBy('created_at', 'desc')->get())
+                ->addIndexColumn()
+                ->addColumn('aksi', function ($data) {
+                    $dataId = Crypt::encryptString($data->id);
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+                    return  '<button type="button" name="edit" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                })->rawColumns(['aksi'])->make(true);
+        }
     }
 
     /**
@@ -81,10 +61,51 @@ class SupportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+
+    public function storeAlias(Request $request, Alias $alias)
     {
         //
+        $rules = array(
+            'nama_field'       => 'required|max:200|unique:aliases,nama_field',
+            'alias'            => 'required|max:200',
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()]);
+        }
+
+        $alias->nama_field = $request->nama_field;
+        $alias->alias = $request->alias;
+        $alias->created_by = Auth::user()->id;
+        $alias->updated_by = Auth::user()->id;
+
+        $alias->save();
+        return response()->json(['success' => 'Data Added successfully.']);
     }
+
+
+    public function storeRencana(Request $request, Rencana $rencana)
+    {
+        //
+        $rules = array(
+            'nama'       => 'required|max:200|unique:rencanas,title',
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()]);
+        }
+
+        $rencana->title = $request->nama;
+        $rencana->created_by = Auth::user()->id;
+        $rencana->updated_by = Auth::user()->id;
+        $rencana->save();
+        return response()->json(['success' => 'Data Added successfully.']);
+    }
+
 
     /**
      * Display the specified resource.
@@ -103,9 +124,18 @@ class SupportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function editAlias($id)
     {
         //
+        try {
+            $dataId = Crypt::decryptString($id);
+            if (request()->ajax()) {
+                $data = Alias::findOrFail($dataId)->makeHidden('id');
+                return response()->json($data);
+            }
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
     }
 
     /**
@@ -115,9 +145,33 @@ class SupportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function updateAlias(Request $request, Alias $alias)
     {
-        //
+        try {
+            $dataId = Crypt::decryptString($request->input('id'));
+
+
+            $rules = array(
+
+                'nama_field'       => 'required|max:200|unique:aliases,nama_field,' . $dataId,
+                'alias'            => 'required|max:200',
+
+            );
+            $error = Validator::make($request->all(), $rules);
+            if ($error->fails()) {
+                return response()->json(['errors' => $error->errors()]);
+            }
+            $formData = array(
+                'nama_field'        =>  $request->nama_field,
+                'alias'             =>  $request->alias,
+            );
+
+            $alias->whereId($dataId)->update($formData);
+
+            return response()->json(['success' => 'Data is successfully updated']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
     }
 
     /**

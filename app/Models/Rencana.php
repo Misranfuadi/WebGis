@@ -12,6 +12,7 @@ class Rencana extends Model
     use HasFactory;
     use SoftDeletes;
 
+
     protected $fillable = [
         'title',
         'created_by',
