@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Alias;
+use App\Models\Datashp;
+use App\Models\Rencana;
 use Illuminate\Http\Request;
-// use Shapefile\Shapefile;
-use Shapefile\ShapefileException;
-use Shapefile\ShapefileReader;
+use App\Models\Shp;
+use Validator;
+use Illuminate\Support\Facades\DB;
 
 class ShpController extends Controller
 {
@@ -17,60 +19,27 @@ class ShpController extends Controller
      */
     public function index()
     {
-        try {
-            // Open Shapefile
-            $Shapefile = new ShapefileReader(public_path('file/jalan/JARINGAN_JALAN_ACEH'));
 
+        if (request()->ajax()) {
+            return datatables()->of(Shp::orderBy('created_at', 'desc')->get())
+                ->addIndexColumn()
+                ->addColumn('created_by', function ($data) {
+                    return $data->createdBy->name;
+                })
+                ->addColumn('aksi', function ($data) {
+                    $dataId = Crypt::encryptString($data->id);
 
-            // Read all the records
-            while ($Geometry = $Shapefile->fetchRecord()) {
-                // Skip the record if marked as "deleted"
-                if ($Geometry->isDeleted()) {
-                    continue;
-                }
-
-                // Print Geometry as an Array
-                //dump($Geometry->getArray());
-
-                // Print Geometry as WKT
-                //dump($Geometry->getWKT());
-
-
-
-                // Print DBF data
-                $dbf[] = ($Geometry->getDataArray());
-
-
-                // Print Geometry as GeoJSON
-                $shp[] = ($Geometry->getGeoJSON());
-            }
-
-            foreach ($dbf as $key => $value) {
-                $dbf[$key]['KOORDINAT'] = $shp[$key];
-            }
-
-            dd($dbf);
-
-            //return view('contents.shp', compact('dbf'));
-        } catch (ShapefileException $e) {
-            // Print detailed error information
-            echo "Error Type: " . $e->getErrorType()
-                . "\nMessage: " . $e->getMessage()
-                . "\nDetails: " . $e->getDetails();
+                    return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit_alias btn btn-warning btn-xs  mr-2">Edit</button>' .
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete_alias btn btn-danger btn-xs ">Hapus</button>';
+                })->rawColumns(['aksi'])->make(true);
         }
 
-        // return view('contents.shp');
+        $listAlias  = Alias::select('id', 'alias', 'nama_field')->orderBy('alias', 'asc')->get();
+        $listRencana  = Rencana::select('id', 'title')->orderBy('title', 'asc')->get();
+
+        return view('contents.shp', compact('listAlias', 'listRencana'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -78,9 +47,67 @@ class ShpController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Shp $shp, Datashp $datashp)
     {
         //
+        $rules = array(
+            'nama_peta'       => 'required|max:200|unique:shps,peta',
+            'keluaran'            => 'required|max:200',
+            'sumber_dokumen'            => 'required|max:200',
+            'jenis_rencana'            => 'required',
+            'jenis_data'            => 'required|in:polygon,line,point',
+            'nama_field'            => 'required',
+            'file_shp'            => 'required|mimes:zip,rar',
+        );
+
+        $error = Validator::make($request->all(), $rules);
+
+        if ($error->fails()) {
+            return response()->json(['errors' => $error->errors()]);
+        }
+
+        $year = date('Y');
+        $month = date('m');
+        $data = $this->getYears($year, $month);
+        $max_protocol = $data['max_id'];
+
+        if ($max_protocol && !empty($max_protocol) && $max_protocol != NULL) {
+            $data = (int) $max_protocol + 1;
+            $nomor = str_pad($data, 4, '0', STR_PAD_LEFT);
+        } else {
+            $data = 1;
+            $nomor =  str_pad($data, 4, '0', STR_PAD_LEFT);
+        }
+
+        $noRegis = $year . $month . $nomor;
+
+
+        $shp->register = $noRegis;
+        $shp->peta = $request->nama_peta;
+        $shp->keluaran = $request->keluaran;
+        $shp->id_rencana = $request->jenis_rencana;
+        $shp->sumber_dokumen = $request->sumber_dokumen;
+        $shp->peta = $request->nama_peta;
+        $shp->peta = $request->nama_peta;
+        $shp->created_by = Auth::user()->id;
+        $shp->updated_by = Auth::user()->id;
+
+        $shp->save();
+
+
+
+
+
+
+        $uploadFile = $request->file('file_shp');
+
+        $file = $uploadFile->store('public/fileShp');
+
+
+
+
+
+        return response()->json($file);
     }
 
     /**
@@ -126,5 +153,18 @@ class ShpController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getYears($year, $month)
+    {
+        $data = Shp::select(DB::raw('count(id) as max_id'))
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get();
+
+        if ($data->count() > 0) {
+            return  $data->first();
+        }
+        return FALSE;
     }
 }

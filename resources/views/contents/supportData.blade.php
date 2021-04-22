@@ -142,10 +142,10 @@
                     @csrf
                     @method('POST')
                     <div class="card-body">
-                        <div id="form-nama" class="form-group">
-                            <label for="nama">Nama</label>
-                            <input type="text" name="nama" id="nama" class="form-control" />
-                            <span id="error-nama" class="error text-red"></span>
+                        <div id="form-nama_rencana" class="form-group">
+                            <label for="nama_rencana">Nama Rencana</label>
+                            <input type="text" name="nama_rencana" id="nama_rencana" class="form-control" />
+                            <span id="error-nama_rencana" class="error text-red"></span>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -156,6 +156,32 @@
                         <button type="button" class="btn btn-default"
                             data-dismiss="modal">{{ trans('cruds.user.fields.close') }}</button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- modal-delete--}}
+    <div id="confirmModal" class="modal fade" data-backdrop="static" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="modal-wrapper  text-center">
+                        <div class="center ">
+                            <h1 class="fa fa-question-circle" style="color:#5bc0de;"></h1>
+                        </div>
+                        <div class="modal-text">
+                            <h4>Anda yakin?</h4>
+                            <p>Yakin untuk menghapus data ini?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="action_delete" id="action_delete" />
+                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                </div>
                 </form>
             </div>
         </div>
@@ -210,9 +236,9 @@
         columns: [
             { data: "DT_RowIndex" , width: 10 },
             { data: "title" },
+            { data: "created_by" },
             { data: "created_at" },
             { data: "updated_at" },
-            { data: "created_by" },
             { data: "aksi",orderable: false, searchable: false ,className: "text-nowrap" }
         ]
     });
@@ -272,24 +298,23 @@
         var id = $(this).attr('id');
         $.ajax({
 
-            url: "/support/alias/edit/" + id ,
+            url: "/support/rencana/edit/" + id ,
             dataType: "json",
             type:"GET",
             beforeSend: function () {
                   $('.has-error').removeClass('has-error');
                   $('.error').html('').removeClass('error');
-                  $('.modal-title').text("{{ trans('cruds.alias.title_edit_modal')}}");
+                  $('.modal-title').text("{{ trans('cruds.rencana.title_edit_modal')}}");
                   $('.bg-loading').show();
-                  $('#aliasForm')[0].reset();
+                  $('#rencanaForm')[0].reset();
                  },
             success: function (data) {
                 $('.bg-loading').hide();
-                $('#nama_field').val(data.nama_field);
-                $('#alias').val(data.alias);
-                $('#id').val(id);
+                $('#nama_rencana').val(data.title);
+                $('#id_rencana').val(id);
                 $('#action_button').val("{{ trans('cruds.user.fields.edit') }}");
-                $('#action_alias').val("edit");
-                $('#formModalAlias').modal('show');
+                $('#action_rencana').val("edit");
+                $('#formModalRencana').modal('show');
             }
 
         })
@@ -410,13 +435,19 @@
                             title: 'Data berhasil disimpan'
                         });
                     }
+                    if(data.errors){
+                        Toast.fire({
+                            icon: 'error',
+                            title: data.errors
+                        });
+                    }
                 }
             })
         }
 
         if (action == "edit") {
             $.ajax({
-               url : "{{ route('alias.update') }}",
+               url : "{{ route('rencana.update') }}",
                 type: "POST",
                 data: new FormData(this),
                 contentType: false,
@@ -437,10 +468,10 @@
                         }
                     }
                     if (data.success) {
-                        $('#aliasForm')[0].reset();
-                        $('#aliasTable').DataTable().ajax.reload();
+                        $('#rencanaForm')[0].reset();
+                        $('#rencanaTable').DataTable().ajax.reload();
                         $('.bg-loading').hide();
-                        $('#formModalAlias').modal('hide');
+                        $('#formModalRencana').modal('hide');
                         Toast.fire({
                             icon: 'success',
                             title: 'Data berhasil diedit'
@@ -448,6 +479,86 @@
                     }
                 }
             });
+        }
+    });
+
+    // delete alias
+    $(document).on('click', '.delete_alias', function () {
+        user_id = $(this).attr('id');
+        token = $(this).attr('token');
+        $('#action_delete').val("alias");
+        $('#confirmModal').modal('show');
+    });
+
+     $(document).on('click', '.delete_rencana', function () {
+        user_id = $(this).attr('id');
+        token = $(this).attr('token');
+        $('#action_delete').val("rencana");
+        $('#confirmModal').modal('show');
+    });
+
+    $('#ok_button').click(function () {
+        event.preventDefault();
+        var action = $('#action_delete').val();
+        if ( action == 'alias') {
+            $.ajax({
+                url: "support/alias/destroy/" + user_id,
+                data: {
+                _token: token
+                },
+                type : "DELETE",
+                beforeSend: function () {
+                $('#confirmModal').modal('hide');
+                $('.bg-loading').show();
+                },
+                success: function (data) {
+                    if (data.errors){
+                        $('.bg-loading').hide();
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Data gagal dihapus'
+                        });
+                    }
+                    if (data.success) {
+                    $('#aliasTable').DataTable().ajax.reload();
+                    $('.bg-loading').hide();
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Data berhasil dihapus'
+                    });
+                    }
+                }
+            })
+        }
+        if ( action == 'rencana') {
+            $.ajax({
+                url: "support/rencana/destroy/" + user_id,
+                data: {
+                _token: token
+                },
+                type : "DELETE",
+                beforeSend: function () {
+                $('#confirmModal').modal('hide');
+                $('.bg-loading').show();
+                },
+                success: function (data) {
+                    if (data.errors){
+                        $('.bg-loading').hide();
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Data gagal dihapus'
+                        });
+                    }
+                    if (data.success) {
+                    $('#rencanaTable').DataTable().ajax.reload();
+                    $('.bg-loading').hide();
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Data berhasil dihapus'
+                    });
+                    }
+                }
+            })
         }
     });
 

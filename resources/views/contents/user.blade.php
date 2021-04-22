@@ -396,7 +396,7 @@
                     });
                 }
                  if (data.success) {
-                $('#tableUser').DataTable().ajax.reload();
+                $('#userTable').DataTable().ajax.reload();
                 $('.bg-loading').hide();
                 Toast.fire({
                     icon: 'success',

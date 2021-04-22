@@ -17,6 +17,7 @@ class CreateDatashpsTable extends Migration
             $table->increments('id');
             $table->integer('id_shp')->unsigned();
             $table->text('note');
+            $table->enum('status', ['0', '1', '2'])->default('0');
             $table->string('data_shp');
             $table->integer('created_by')->unsigned();
             $table->timestamps();

@@ -19,6 +19,20 @@ class Rencana extends Model
         'updated_by',
     ];
 
+    protected $hidden = [
+        'id'
+    ];
+
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
 
     protected function serializeDate(DateTimeInterface $date)
     {

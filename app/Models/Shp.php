@@ -4,19 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use DateTimeInterface;
 
-class Alias extends Model
+class Shp extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
-    protected $table = 'aliases';
 
     protected $fillable = [
-        'alias',
-        'nama_field',
+        'register',
+        'peta',
+        'keluaran',
+        'id_rencana',
+        'sumber_dokumen',
+        'jenis_data',
+        'id_alias',
         'created_by',
         'updated_by',
     ];
@@ -33,11 +34,5 @@ class Alias extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');
-    }
-
-
-    protected function serializeDate(DateTimeInterface $date)
-    {
-        return $date->format('Y-m-d H:i:s');
     }
 }

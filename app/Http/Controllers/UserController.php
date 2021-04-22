@@ -112,7 +112,7 @@ class UserController extends Controller
         try {
             $dataId = Crypt::decryptString($id);
             if (request()->ajax()) {
-                $data = User::findOrFail($dataId)->makeHidden('id');
+                $data = User::findOrFail($dataId);
                 return response()->json($data);
             }
         } catch (DecryptException $e) {

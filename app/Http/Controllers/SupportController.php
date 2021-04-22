@@ -32,11 +32,14 @@ class SupportController extends Controller
         if (request()->ajax()) {
             return datatables()->of(Alias::orderBy('created_at', 'desc')->get())
                 ->addIndexColumn()
+                ->addColumn('created_by', function ($data) {
+                    return $data->createdBy->name;
+                })
                 ->addColumn('aksi', function ($data) {
                     $dataId = Crypt::encryptString($data->id);
 
                     return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit_alias btn btn-warning btn-xs  mr-2">Edit</button>' .
-                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete_alias btn btn-danger btn-xs ">Hapus</button>';
                 })->rawColumns(['aksi'])->make(true);
         }
     }
@@ -46,11 +49,14 @@ class SupportController extends Controller
         if (request()->ajax()) {
             return datatables()->of(Rencana::orderBy('created_at', 'desc')->get())
                 ->addIndexColumn()
+                ->addColumn('created_by', function ($data) {
+                    return $data->createdBy->name;
+                })
                 ->addColumn('aksi', function ($data) {
                     $dataId = Crypt::encryptString($data->id);
 
-                    return  '<button type="button" name="edit" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
-                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                    return  '<button type="button" name="edit" id="' . $dataId . '" class="edit_rencana btn btn-warning btn-xs  mr-2">Edit</button>' .
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete_rencana btn btn-danger btn-xs ">Hapus</button>';
                 })->rawColumns(['aksi'])->make(true);
         }
     }
@@ -90,7 +96,7 @@ class SupportController extends Controller
     {
         //
         $rules = array(
-            'nama'       => 'required|max:200|unique:rencanas,title',
+            'nama_rencana'       => 'required|max:200|unique:rencanas,title',
         );
 
         $error = Validator::make($request->all(), $rules);
@@ -99,7 +105,7 @@ class SupportController extends Controller
             return response()->json(['errors' => $error->errors()]);
         }
 
-        $rencana->title = $request->nama;
+        $rencana->title = $request->nama_rencana;
         $rencana->created_by = Auth::user()->id;
         $rencana->updated_by = Auth::user()->id;
         $rencana->save();
@@ -131,6 +137,20 @@ class SupportController extends Controller
             $dataId = Crypt::decryptString($id);
             if (request()->ajax()) {
                 $data = Alias::findOrFail($dataId)->makeHidden('id');
+                return response()->json($data);
+            }
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+    public function editRencana($id)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+            if (request()->ajax()) {
+                $data = Rencana::findOrFail($dataId)->makeHidden('id');
                 return response()->json($data);
             }
         } catch (DecryptException $e) {
@@ -174,14 +194,62 @@ class SupportController extends Controller
         }
     }
 
+    public function updateRencana(Request $request, Rencana $rencana)
+    {
+        try {
+            $dataId = Crypt::decryptString($request->input('id'));
+
+
+            $rules = array(
+
+                'nama_rencana'       => 'required|max:200|unique:rencanas,title,' . $dataId
+
+            );
+            $error = Validator::make($request->all(), $rules);
+            if ($error->fails()) {
+                return response()->json(['errors' => $error->errors()]);
+            }
+            $formData = array(
+                'title'        =>  $request->nama_rencana,
+            );
+
+            $rencana->whereId($dataId)->update($formData);
+
+            return response()->json(['success' => 'Data is successfully updated']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroyAlias($id)
     {
         //
+        try {
+            $dataId = Crypt::decryptString($id);
+            $data = Alias::findOrFail($dataId);
+            $data->delete();
+            return response()->json(['success' => 'Data is successfully deleted']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+    public function destroyRencana($id)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+            $data = Rencana::findOrFail($dataId);
+            $data->delete();
+            return response()->json(['success' => 'Data is successfully deleted']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
     }
 }
