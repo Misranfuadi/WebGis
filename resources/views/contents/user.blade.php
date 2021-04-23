@@ -168,6 +168,7 @@
 
 @section('scripts')
 
+
 <script>
     const Toast = Swal.mixin({
         toast: true,
@@ -189,6 +190,7 @@
     });
 
     var table = $("#userTable").DataTable({
+        dom: 'Bfrtip',
         "responsive": true,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
         "buttons": [
@@ -200,12 +202,18 @@
                 },
                 {
                     extend: 'excel',
+                    title: 'User Gudang SHP',
                     exportOptions: {
                         columns: [ 0, 1, 2, 3, 4 ,5,6 ]
+                    }
+                    customize: function( xlsx ) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row c', sheet).attr( 's', '25' );
                     }
                 },
                 {
                     extend: 'pdf',
+                    title: 'User Gudang SHP',
                     exportOptions: {
                         columns: [ 0, 1, 2, 3, 4 ,5,6 ]
                     }
@@ -217,10 +225,8 @@
                     }
                 }, "colvis"],
         "initComplete": function(settings, json) {
-            table.buttons().container().appendTo('#tableUser_wrapper .col-md-4:eq(0)')
+            table.buttons().container().appendTo('#userTable_wrapper .col-md-4:eq(0)')
         },
-
-
 
         processing: true,
         serverSide: true,
@@ -228,7 +234,6 @@
             url : "{{ route('user') }}",
             type : "GET",
         },
-
             columns: [
                 { data: "DT_RowIndex" , width: 10 },
                 { data: "nip" , className:"text-center"},

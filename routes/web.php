@@ -25,6 +25,8 @@ Route::get('home', 'HomeController@index')->name('home');
 //====Shp
 Route::get('shp', 'ShpController@index')->name('shp');
 Route::post('shp/store', 'ShpController@store')->name('shp.store');
+Route::get('shp/edit/{id}', 'ShpController@edit');
+Route::post('shp/update', 'ShpController@update')->name('shp.update');
 
 //====>SUPPORT
 Route::get('support', 'SupportController@index')->name('support');

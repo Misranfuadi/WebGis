@@ -42,9 +42,9 @@
                                     <th class="text-nowrap">Sumber Dokumen</th>
                                     <th class="text-nowrap">Jenis Data</th>
                                     <th>Alias</th>
+                                    <th>Penginput</th>
                                     <th>{{ trans('cruds.user.fields.created_at') }}</th>
                                     <th>{{ trans('cruds.user.fields.updated_at') }}</th>
-                                    <th>Penginput</th>
                                     <th style="text-align: center">
                                         {{ trans('cruds.user.fields.action') }}
                                     </th>
@@ -100,8 +100,8 @@
                                     <label for="jenis_rencana">Jenis Rencana</label>
 
                                     @if ( count($listRencana) > 0)
-                                    <select class="form-control form-control-sm select2" name="jenis_rencana"
-                                        style="width: 100%;">
+                                    <select class="form-control form-control-sm select2" id="jenis_rencana"
+                                        name="jenis_rencana" style="width: 100%;">
                                         <option value="" selected="selected">Pilih Jenis Rencana</option>
                                         @foreach ($listRencana as $rencana)
                                         <option value="{{ $rencana->id }}">{{ $rencana->title}}
@@ -122,8 +122,9 @@
 
                             <div class="col-6">
                                 <div id="form-jenis_data" class="form-group">
-                                    <label for="jenis_rencana">Jenis Data</label>
-                                    <select class="form-control form-control-sm" id="jenis_data" name="jenis_data">
+                                    <label for="jenis_data">Jenis Data</label>
+                                    <select class="form-control form-control-sm select2" id="jenis_data"
+                                        name="jenis_data">
                                         <option value="" selected="selected">Pilih Jenis Data</option>
                                         <option value="polygon">Polygon</option>
                                         <option value="line">Line</option>
@@ -133,7 +134,7 @@
                                 </div>
 
                                 <div id="form-nama_field" class="form-group">
-                                    <label for="jenis_rencana">Nama Field</label>
+                                    <label for="nama_field">Nama Field</label>
                                     @if ( count($listAlias) > 0)
                                     <select class="form-control form-control-sm select2" id="nama_field"
                                         name="nama_field" style="width: 100%;">
@@ -153,7 +154,7 @@
                                     <span id="error-nama_field" class="error text-red"></span>
                                 </div>
 
-                                <div class="form-group">
+                                <div id="form-file_shp" class="form-group">
                                     <label for="file_shp">File SHP (.zip atau .rar)</label>
 
                                     <div class="custom-file">
@@ -163,6 +164,12 @@
 
                                     <span id="error-file_shp" class="error text-red"></span>
 
+                                </div>
+
+                                <div id="form-note" class="form-group">
+                                    <label for="note">Note</label>
+                                    <textarea name="note" id="note" class="form-control form-control-sm"
+                                        rows="3"></textarea>
                                 </div>
                             </div>
 
@@ -206,7 +213,41 @@
     var table = $("#shpTable").DataTable({
         "responsive": true,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-
+        dom: 'Bfrtip',
+        "buttons": [
+                {
+                    extend: 'copy',
+                    exportOptions: {
+                        columns: [ 0, 1, 2, 3, 4 ,5,6,7,8 ]
+                    }
+                },
+                {
+                    extend: 'excel',
+                    title: 'Data SHP',
+                    exportOptions: {
+                        columns: [ 0, 1, 2, 3, 4 ,5,6,7,8 ]
+                    },
+                    customize: function( xlsx ) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        $('row c', sheet).attr( 's', '25' );
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    title: 'Data SHP',
+                    exportOptions: {
+                        columns: [ 0, 1, 2, 3, 4 ,5,6,7,8 ]
+                    }
+                },
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: [ 0, 1, 2, 3, 4,5,6,7,8 ]
+                    }
+                }, "colvis"],
+        "initComplete": function(settings, json) {
+            table.buttons().container().appendTo('#shpTable_wrapper .col-md-4:eq(0)')
+        },
         processing: true,
         serverSide: true,
         ajax: {"dataType": 'json',
@@ -216,11 +257,11 @@
         columns: [
             { data: "DT_RowIndex" , width: 10 },
             { data: "register" },
-            { data: "peta" },
-            { data: "keluaran" },
+            { data: "peta",},
+            { data: "keluaran",className: "text-nowrap" },
             { data: "id_rencana" },
-            { data: "sumber_dokumen" },
-            { data: "jenis_data" },
+            { data: "sumber_dokumen" ,className: "text-nowrap" },
+            { data: "jenis_data", className:"text-capitalize" },
             { data: "id_alias" },
             { data: "created_by" },
             { data: "created_at" },
@@ -232,11 +273,52 @@
     $('#create_record').click(function () {
         $('#action_button').val("{{ trans('cruds.user.fields.add') }}");
         $('#formModal').modal('show');
+        $('#form-file_shp').show();
+        $('#form-note').show();
         $('.modal-title').text("Tambah Data Shp");
         $('#action').val("add");
         $('#shpForm')[0].reset();
+
+        $('#jenis_rencana').val('').change();
+        $('#jenis_data').val('').change();
+        $('#nama_field').val('').change();
+
+
         $('.has-error').removeClass('has-error');
         $('.error').html('').removeClass('error');
+    });
+
+    //edit function
+    $(document).on('click', '.edit', function () {
+        var id = $(this).attr('id');
+        $.ajax({
+            url: "/shp/edit/" + id ,
+            dataType: "json",
+            type:"GET",
+            beforeSend: function () {
+                  $('.has-error').removeClass('has-error');
+                  $('.error').html('').removeClass('error');
+                  $('.modal-title').text("Edit Data Shp");
+                  $('.bg-loading').show();
+                  $('#shpForm')[0].reset();
+                 },
+            success: function (data) {
+                $('.bg-loading').hide();
+                $('#form-file_shp').hide();
+                $('#form-note').hide();
+                $('#nama_peta').val(data.peta);
+                $('#keluaran').val(data.keluaran);
+                $('#sumber_dokumen').val(data.sumber_dokumen);
+                $('#jenis_rencana').val(data.id_rencana).change();
+                $('#jenis_data').val(data.jenis_data).change();
+                $('#nama_field').val(data.id_alias).change();
+                $('#id').val(id);
+                $('#action_button').val("{{ trans('cruds.user.fields.edit') }}");
+                $('#action').val("edit");
+                $('#formModal').modal('show');
+            }
+
+        })
     });
 
     $('#shpForm').on('submit', function (event) {
@@ -278,41 +360,41 @@
             })
         }
 
-        // if (action == "edit") {
-        //     $.ajax({
-        //        url : "{{ route('user.update') }}",
-        //         type: "POST",
-        //         data: new FormData(this),
-        //         contentType: false,
-        //         cache: false,
-        //         processData: false,
-        //         dataType: "json",
-        //         beforeSend: function () {
-        //           $('.has-error').removeClass('has-error');
-        //           $('.error').html('').removeClass('error');
-        //           $('.bg-loading').show();
-        //          },
-        //         success: function (data) {
-        //            if (data.errors) {
-        //                 for (control in data.errors) {
-        //                     $('#form-' + control).addClass('has-error');
-        //                     $('#error-' + control).addClass('error').html(data.errors[control]);
-        //                     $('.bg-loading').hide();
-        //                 }
-        //             }
-        //             if (data.success) {
-        //                 $('#userForm')[0].reset();
-        //                 $('#userTable').DataTable().ajax.reload();
-        //                 $('.bg-loading').hide();
-        //                 $('#formModal').modal('hide');
-        //                 Toast.fire({
-        //                     icon: 'success',
-        //                     title: 'Data berhasil diedit'
-        //                 });
-        //             }
-        //         }
-        //     });
-        // }
+        if (action == "edit") {
+            $.ajax({
+               url : "{{ route('shp.update') }}",
+                type: "POST",
+                data: new FormData(this),
+                contentType: false,
+                cache: false,
+                processData: false,
+                dataType: "json",
+                beforeSend: function () {
+                  $('.has-error').removeClass('has-error');
+                  $('.error').html('').removeClass('error');
+                  $('.bg-loading').show();
+                 },
+                success: function (data) {
+                   if (data.errors) {
+                        for (control in data.errors) {
+                            $('#form-' + control).addClass('has-error');
+                            $('#error-' + control).addClass('error').html(data.errors[control]);
+                            $('.bg-loading').hide();
+                        }
+                    }
+                    if (data.success) {
+                        $('#shpForm')[0].reset();
+                        $('#shpTable').DataTable().ajax.reload();
+                        $('.bg-loading').hide();
+                        $('#formModal').modal('hide');
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Data berhasil diedit'
+                        });
+                    }
+                }
+            });
+        }
     });
 
 </script>
