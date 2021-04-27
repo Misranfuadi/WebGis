@@ -205,7 +205,7 @@
                     title: 'User Gudang SHP',
                     exportOptions: {
                         columns: [ 0, 1, 2, 3, 4 ,5,6 ]
-                    }
+                    },
                     customize: function( xlsx ) {
                         var sheet = xlsx.xl.worksheets['sheet1.xml'];
                         $('row c', sheet).attr( 's', '25' );

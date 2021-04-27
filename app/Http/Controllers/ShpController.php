@@ -12,9 +12,14 @@ use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Storage;
 
 class ShpController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -26,6 +31,10 @@ class ShpController extends Controller
         if (request()->ajax()) {
             return datatables()->of(Shp::orderBy('created_at', 'desc')->get())
                 ->addIndexColumn()
+                ->addColumn('register', function ($data) {
+                    $dataId = Crypt::encryptString($data->id);
+                    return '<a href="' . route('shp.show', ['id' => $dataId]) . '">' . $data->register . '</a>';
+                })
                 ->addColumn('id_rencana', function ($data) {
                     return $data->rencana->title;
                 })
@@ -39,8 +48,8 @@ class ShpController extends Controller
                     $dataId = Crypt::encryptString($data->id);
 
                     return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
-                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete_alias btn btn-danger btn-xs ">Hapus</button>';
-                })->rawColumns(['aksi'])->make(true);
+                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                })->rawColumns(['aksi', 'register'])->make(true);
         }
 
         $listAlias  = Alias::select('id', 'alias', 'nama_field')->orderBy('alias', 'asc')->get();
@@ -138,6 +147,15 @@ class ShpController extends Controller
     public function show($id)
     {
         //
+        try {
+            $dataId = Crypt::decryptString($id);
+
+            $data = Shp::findOrFail($dataId);
+
+            return view('contents.shpView', compact('data'));
+        } catch (DecryptException $e) {
+            abort(403, 'Opss, Ada yang salah');
+        }
     }
 
     /**
@@ -191,7 +209,7 @@ class ShpController extends Controller
                 'peta'            =>  $request->nama_peta,
                 'keluaran'             =>  $request->keluaran,
                 'sumber_dokumen'       =>  $request->sumber_dokumen,
-                'id_rencana'         =>  $request->jenis_rencan,
+                'id_rencana'         =>  $request->jenis_rencana,
                 'jenis_data'           =>  $request->jenis_data,
                 'id_alias'           =>  $request->nama_field,
             );
@@ -214,6 +232,27 @@ class ShpController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $dataId = Crypt::decryptString($id);
+
+            $datafile = Datashp::where('id_shp', $dataId)->get();
+
+
+            foreach ($datafile as $data) {
+                Storage::delete($data->data_shp);
+            }
+
+            Datashp::where('id_shp', $dataId)->delete();
+
+
+            $data = Shp::findOrFail($dataId);
+            $data->delete();
+
+
+            return response()->json(['success' => 'Data is successfully deleted']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
     }
 
     public function getYears($year, $month)

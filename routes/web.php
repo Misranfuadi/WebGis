@@ -26,7 +26,9 @@ Route::get('home', 'HomeController@index')->name('home');
 Route::get('shp', 'ShpController@index')->name('shp');
 Route::post('shp/store', 'ShpController@store')->name('shp.store');
 Route::get('shp/edit/{id}', 'ShpController@edit');
+Route::get('shp/show/{id}', 'ShpController@show')->name('shp.show');
 Route::post('shp/update', 'ShpController@update')->name('shp.update');
+Route::delete('shp/destroy/{id}', 'ShpController@destroy');
 
 //====>SUPPORT
 Route::get('support', 'SupportController@index')->name('support');

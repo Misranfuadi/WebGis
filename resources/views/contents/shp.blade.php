@@ -187,6 +187,31 @@
             </div>
         </div>
     </div>
+
+    {{-- modal-delete--}}
+    <div id="confirmModal" class="modal fade" data-backdrop="static" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="modal-wrapper  text-center">
+                        <div class="center ">
+                            <h1 class="fa fa-question-circle" style="color:#5bc0de;"></h1>
+                        </div>
+                        <div class="modal-text">
+                            <h4>Anda yakin?</h4>
+                            <p>Yakin untuk menghapus data ini?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -395,6 +420,43 @@
                 }
             });
         }
+    });
+
+    //delete function
+    $(document).on('click', '.delete', function () {
+        user_id = $(this).attr('id');
+        token = $(this).attr('token');
+        $('#confirmModal').modal('show');
+    });
+    $('#ok_button').click(function () {
+        $.ajax({
+            url: "shp/destroy/" + user_id,
+            data: {
+            _token: token
+            },
+            type : "DELETE",
+            beforeSend: function () {
+              $('#confirmModal').modal('hide');
+              $('.bg-loading').show();
+            },
+            success: function (data) {
+                if (data.errors){
+                    $('.bg-loading').hide();
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Data gagal dihapus'
+                    });
+                }
+                 if (data.success) {
+                $('#shpTable').DataTable().ajax.reload();
+                $('.bg-loading').hide();
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Data berhasil dihapus'
+                });
+                }
+            }
+        })
     });
 
 </script>
