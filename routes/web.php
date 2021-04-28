@@ -27,6 +27,14 @@ Route::get('shp', 'ShpController@index')->name('shp');
 Route::post('shp/store', 'ShpController@store')->name('shp.store');
 Route::get('shp/edit/{id}', 'ShpController@edit');
 Route::get('shp/show/{id}', 'ShpController@show')->name('shp.show');
+Route::post('shp/show/upload', 'ShpController@upload')->name('shp.show.upload');
+Route::get('shp/show/edit/{id}', 'ShpController@editUpload');
+Route::get('shp/show/approve/{id}', 'ShpController@approve')->name('shp.show.approve');
+Route::get('shp/show/blocked/{id}', 'ShpController@blocked')->name('shp.show.blocked');
+Route::post('shp/show/update', 'ShpController@updateUpload')->name('shp.show.update');
+Route::get('shp/download/{id}/{nama}', 'ShpController@download')->name('shp.download');
+Route::delete('shp/show/destroy/{id}', 'ShpController@destroyUpload');
+
 Route::post('shp/update', 'ShpController@update')->name('shp.update');
 Route::delete('shp/destroy/{id}', 'ShpController@destroy');
 

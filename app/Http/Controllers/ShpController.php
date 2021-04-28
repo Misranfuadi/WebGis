@@ -7,6 +7,7 @@ use App\Models\Datashp;
 use App\Models\Rencana;
 use Illuminate\Http\Request;
 use App\Models\Shp;
+use Facade\FlareClient\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use Illuminate\Support\Facades\DB;
@@ -46,10 +47,14 @@ class ShpController extends Controller
                 })
                 ->addColumn('aksi', function ($data) {
                     $dataId = Crypt::encryptString($data->id);
-
-                    return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
-                        '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
-                })->rawColumns(['aksi', 'register'])->make(true);
+                    if (Auth::user()->role == 'approver') {
+                        return  '<a class="btn btn-info btn-xs mr-2" href="' . route('shp.show', ['id' => $dataId]) . '">Lihat</a>' .
+                            '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
+                            '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                    } else {
+                        return '<a class="btn btn-info btn-xs " href="' . route('shp.show', ['id' => $dataId]) . '">Lihat</a>';
+                    }
+                })->rawColumns(['aksi', 'register', 'sumber_dokumen'])->make(true);
         }
 
         $listAlias  = Alias::select('id', 'alias', 'nama_field')->orderBy('alias', 'asc')->get();
@@ -150,13 +155,130 @@ class ShpController extends Controller
         try {
             $dataId = Crypt::decryptString($id);
 
+            if (request()->ajax()) {
+                return datatables()->of(Datashp::where('id_shp', $dataId)->orderBy('created_at', 'desc')->get())
+
+
+                    ->addColumn('created_by', function ($data) {
+                        return $data->createdBy->name;
+                    })
+                    ->addColumn('aksi', function ($data) {
+                        $dataId = Crypt::encryptString($data->id);
+                        if (Auth::user()->id == $data->created_by && $data->status != 2) {
+                            return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>';
+                        } elseif (Auth::user()->role == 'master') {
+                            return '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
+                        }
+                    })->rawColumns(['aksi', 'register', 'note'])->make(true);
+            }
+
             $data = Shp::findOrFail($dataId);
 
-            return view('contents.shpView', compact('data'));
+
+            return view('contents.shpView', compact('data', 'id'));
         } catch (DecryptException $e) {
             abort(403, 'Opss, Ada yang salah');
         }
     }
+
+
+    public function upload(Request $request, Datashp $datashp)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($request->id);
+
+            $rules = array(
+                'file_shp'            => 'required|mimes:zip,rar',
+                'id'            => 'required',
+            );
+
+            $error = Validator::make($request->all(), $rules);
+
+            if ($error->fails()) {
+                return response()->json(['errors' => $error->errors()]);
+            }
+
+
+            if ($request->file('file_shp')->isValid()) {
+                $uploadFile = $request->file('file_shp');
+
+                $fileSizeBytes = filesize($uploadFile);
+                $fileSizeMB = ($fileSizeBytes / 1024 / 1024);
+                //Format it so that only 2 decimal points are displayed.
+                $fileSizeMB = number_format($fileSizeMB, 2);
+
+                $file = $uploadFile->store('public/fileShp');
+            } else {
+                $file = false;
+                $fileSizeMB = false;
+            }
+
+
+            $datashp->id_shp = $dataId;
+            $datashp->note = $request->note;
+            $datashp->data_shp = $file;
+            $datashp->data_size = $fileSizeMB . ' MB';
+            $datashp->created_by = Auth::user()->id;
+            $datashp->save();
+
+
+
+            return response()->json(['success' => 'Data Added successfully.']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+    public function editUpload($id)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+            if (request()->ajax()) {
+                $data = Datashp::findOrFail($dataId);
+                return response()->json($data);
+            }
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+    public function updateUpload(Request $request, Datashp $datashp)
+    {
+        //
+
+        try {
+            $dataId = Crypt::decryptString($request->input('id'));
+
+            $datashp->whereId($dataId)->update(['note' =>  $request->note]);
+
+            return response()->json(['success' => 'Data is successfully updated']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+    public function destroyUpload($id)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+
+            $data = Datashp::findOrFail($dataId);
+
+            Storage::delete($data->data_shp);
+
+            $data->delete();
+
+
+            return response()->json(['success' => 'Data is successfully deleted']);
+        } catch (DecryptException $e) {
+            return response()->json(['errors' => 'Oops! somthing wrong']);
+        }
+    }
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -177,6 +299,59 @@ class ShpController extends Controller
             return response()->json(['errors' => 'Oops! somthing wrong']);
         }
     }
+
+    public function approve($id, Datashp $datashp)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+
+
+
+            $formData = array(
+                'updated_by'       =>  Auth::user()->id,
+                'status'           =>  '1'
+            );
+
+
+            $datashp->whereId($dataId)->update($formData);
+            return redirect()->back();
+        } catch (DecryptException $e) {
+            abort(403, 'Opss, Ada yang salah');
+        }
+    }
+
+    public function blocked($id, Datashp $datashp)
+    {
+        //
+        try {
+            $dataId = Crypt::decryptString($id);
+
+            $formData = array(
+                'updated_by'      =>  Auth::user()->id,
+                'status'           =>  '2'
+            );
+
+            $datashp->whereId($dataId)->update($formData);
+            return redirect()->back();
+        } catch (DecryptException $e) {
+            abort(403, 'Opss, Ada yang salah');
+        }
+    }
+
+    public function download($id, $nama)
+    {
+        try {
+            $dataId = Crypt::decryptString($id);
+
+            $data = Datashp::findOrFail($dataId);
+            return Storage::download($data->data_shp, $nama . '.zip');
+        } catch (DecryptException $e) {
+            abort(403, 'Opss, Ada yang salah');
+        }
+    }
+
+
 
     /**
      * Update the specified resource in storage.
