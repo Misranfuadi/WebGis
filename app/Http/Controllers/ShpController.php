@@ -34,13 +34,21 @@ class ShpController extends Controller
                 ->addIndexColumn()
                 ->addColumn('register', function ($data) {
                     $dataId = Crypt::encryptString($data->id);
-                    return '<a href="' . route('shp.show', ['id' => $dataId]) . '">' . $data->register . '</a>';
+                    return '<a title="Lihat" href="' . route('shp.show', ['id' => $dataId]) . '">' . $data->register . '</a>';
                 })
                 ->addColumn('id_rencana', function ($data) {
                     return $data->rencana->title;
                 })
                 ->addColumn('id_alias', function ($data) {
                     return $data->alias->alias . ' (' . $data->alias->nama_field . ')';
+                })
+                ->addColumn('peta', function ($data) {
+                    if (!empty($data->downloadShp)) {
+                        return '<span class="badge badge-info mr-2">' . $data->countdataShp->count() . '</span>' .
+                            '<a title="Unduh Shp Terbaru" href="' . route('shp.download', ['id' => Crypt::encryptString($data->downloadShp->id), 'nama' => $data->peta . '_' . $data->downloadShp->created_at]) . '">' . $data->peta . '</a>';
+                    } else {
+                        return '<span class="badge badge-info mr-2">' . $data->countdataShp->count() . '</span>' .  $data->peta;
+                    }
                 })
                 ->addColumn('created_by', function ($data) {
                     return $data->createdBy->name;
@@ -54,7 +62,7 @@ class ShpController extends Controller
                     } else {
                         return '<a class="btn btn-info btn-xs " href="' . route('shp.show', ['id' => $dataId]) . '">Lihat</a>';
                     }
-                })->rawColumns(['aksi', 'register', 'sumber_dokumen'])->make(true);
+                })->rawColumns(['aksi', 'register', 'peta', 'sumber_dokumen'])->make(true);
         }
 
         $listAlias  = Alias::select('id', 'alias', 'nama_field')->orderBy('alias', 'asc')->get();
@@ -158,14 +166,18 @@ class ShpController extends Controller
             if (request()->ajax()) {
                 return datatables()->of(Datashp::where('id_shp', $dataId)->orderBy('created_at', 'desc')->get())
 
-
                     ->addColumn('created_by', function ($data) {
                         return $data->createdBy->name;
                     })
                     ->addColumn('aksi', function ($data) {
                         $dataId = Crypt::encryptString($data->id);
                         if (Auth::user()->id == $data->created_by && $data->status != 2) {
-                            return  '<button type="button" name="edit_alias" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>';
+                            return  '<button type="button" name="edit" id="' . $dataId . '" class="edit btn btn-warning btn-xs  mr-2">Edit</button>' .
+                                '<a href="' . route('shp.download', ['id' => $dataId, 'nama' => $data->oneShp->peta . '_' . $data->created_at]) . '" class=" btn btn-primary btn-xs"><i class="fa fa-download"></i></a>';
+                        } elseif ($data->status == 1) {
+                            return '<a  href="' . route('shp.download', ['id' => $dataId, 'nama' => $data->oneShp->peta . '_' . $data->created_at]) . '" class="btn btn-primary btn-xs "><i class="fa fa-download"></i></a>';
+                        } elseif ($data->status == 2) {
+                            return '<a  class=" btn btn-danger btn-xs disabled"><i class="fa fa-download"></i></a>';
                         } elseif (Auth::user()->role == 'master') {
                             return '<button type="button" name="delete" id="' . $dataId . '" token="' . csrf_token() . '" class="delete btn btn-danger btn-xs ">Hapus</button>';
                         }

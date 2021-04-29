@@ -44,6 +44,7 @@
                     </a>
                 </li>
 
+                @if(Auth::user()->role != 'staff')
                 <li class="nav-item">
                     <a href="{{ route('support') }}"
                         class="nav-link {{ Request::segment(1) === 'support' ? 'active' : null }}">
@@ -53,7 +54,8 @@
                         </p>
                     </a>
                 </li>
-
+                @endif
+                @if(Auth::user()->role == 'master')
                 <li class="nav-item">
                     <a href="{{ route('user') }}"
                         class="nav-link {{ Request::segment(1) === 'user' ? 'active' : null }}">
@@ -63,6 +65,7 @@
                         </p>
                     </a>
                 </li>
+                @endif
 
             </ul>
         </nav>

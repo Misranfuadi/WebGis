@@ -34,6 +34,17 @@ class Shp extends Model
         return $this->hasMany(Datashp::class, 'id_shp')->orderBy('created_at', 'desc');
     }
 
+    public function countdataShp()
+    {
+        return $this->hasMany(Datashp::class, 'id_shp')->where('status', '1');
+    }
+
+
+    public function downloadShp()
+    {
+        return $this->hasOne(Datashp::class, 'id_shp')->where('status', '1')->orderBy('created_at', 'desc');
+    }
+
     public function rencana()
     {
         return $this->belongsTo(Rencana::class, 'id_rencana');

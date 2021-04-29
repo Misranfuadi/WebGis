@@ -27,6 +27,15 @@
 
                             <h3 class="profile-username text-center">{{ $data->peta }}</h3>
                             <p class="text-muted text-center">No.Reg {{ $data->register }}</p>
+                            @if(!empty($data->downloadShp) )
+                            <p class="text-center">
+                                <a href="{{ route('shp.download',['id'=> Crypt::encryptString($data->downloadShp->id), 'nama'=>$data->peta. '_' . $data->downloadShp->created_at]) }}"
+                                    class="btn btn-primary btn-xs">Unduh Terbaru</a>
+                            </p>
+                            @endif
+                            <strong>Total Data Shp</strong>
+                            <p class="text-muted"> {{  $data->countdataShp->count() }}</p>
+                            <hr>
                             <strong>Keluaran</strong>
                             <p class="text-muted"> {{ $data->keluaran }}</p>
                             <hr>
@@ -122,7 +131,7 @@
                                                     <a href="{{ route('shp.download',['id'=> Crypt::encryptString($shp->id), 'nama'=>$data->peta]) }}"
                                                         class="btn btn-primary btn-xs float-right">Unduh</a>
                                                     @elseif($shp->status == 1 )
-                                                    <a href="{{ route('shp.download',['id'=> Crypt::encryptString($shp->id), 'nama'=>$data->peta]) }}"
+                                                    <a href="{{ route('shp.download',['id'=> Crypt::encryptString($shp->id), 'nama'=>$data->peta. '_' . $shp->created_at]) }}"
                                                         class="btn btn-primary btn-xs">Unduh</a>
                                                     @endif
                                                 </div>
