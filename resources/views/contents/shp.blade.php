@@ -26,31 +26,35 @@
             <div class="row">
                 <div class="card col">
                     <div class="card-header">
+                        @if (Auth::user()->role == 'approver')
                         <button type="button" name="create_record" id="create_record" class=" btn btn-sm btn-primary">
                             <i class="fa fa-plus mr-2"></i>{{ trans('cruds.user.fields.add') }}</button>
+                        @else
+                        <h1 class="card-title"">Data Shp</h1>
+                        @endif
                     </div>
                     <!-- /.card-header -->
-                    <div class="card-body">
-                        <table id="shpTable" class="table table-bordered table-striped" width="100%">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>No.Reg</th>
-                                    <th>Peta</th>
-                                    <th>Keluaran</th>
-                                    <th class="text-nowrap">Jenis Rencana</th>
-                                    <th class="text-nowrap">Sumber Dokumen</th>
-                                    <th class="text-nowrap">Jenis Data</th>
-                                    <th>Alias</th>
-                                    <th>Penginput</th>
-                                    <th>{{ trans('cruds.user.fields.created_at') }}</th>
-                                    <th>{{ trans('cruds.user.fields.updated_at') }}</th>
-                                    <th style="text-align: center">
-                                        {{ trans('cruds.user.fields.action') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                        </table>
+                    <div class=" card-body">
+                            <table id="shpTable" class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>No.Reg</th>
+                                        <th>Peta</th>
+                                        <th>Keluaran</th>
+                                        <th class="text-nowrap">Jenis Rencana</th>
+                                        <th class="text-nowrap">Sumber Dokumen</th>
+                                        <th class="text-nowrap">Jenis Data</th>
+                                        <th>Alias</th>
+                                        <th>Penginput</th>
+                                        <th>{{ trans('cruds.user.fields.created_at') }}</th>
+                                        <th>{{ trans('cruds.user.fields.updated_at') }}</th>
+                                        <th style="text-align: center">
+                                            {{ trans('cruds.user.fields.action') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                            </table>
                     </div>
                     <!-- /.card-body -->
                 </div>

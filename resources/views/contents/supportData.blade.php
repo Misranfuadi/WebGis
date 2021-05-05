@@ -219,7 +219,7 @@
             { data: "created_by" },
             { data: "created_at" },
             { data: "updated_at" },
-            { data: "aksi",orderable: false, searchable: false ,className: "text-nowrap" }
+            { data: "aksi",orderable: false, searchable: false ,className: "text-nowrap text-center" }
         ]
     });
 
@@ -239,7 +239,8 @@
             { data: "created_by" },
             { data: "created_at" },
             { data: "updated_at" },
-            { data: "aksi",orderable: false, searchable: false ,className: "text-nowrap" }
+            { data: "aksi",orderable: false, searchable: false ,className: "text-nowrap text-center" }
+        ]" }
         ]
     });
 
