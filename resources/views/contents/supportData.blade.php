@@ -215,7 +215,7 @@
         columns: [
             { data: "DT_RowIndex" , width: 10 },
             { data: "nama_field" },
-            { data: "alias" , className:"text-nowrap"},
+            { data: "alias" },
             { data: "created_by" },
             { data: "created_at" },
             { data: "updated_at" },
